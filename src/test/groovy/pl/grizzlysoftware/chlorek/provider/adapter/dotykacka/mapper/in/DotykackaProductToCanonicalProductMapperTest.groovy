@@ -2,6 +2,7 @@ package pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.in
 
 import pl.grizzlysoftware.chlorek.core.model.ContainerType
 import pl.grizzlysoftware.chlorek.core.provider.CategoryProvider
+import pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.out.CanonicalProductToDotykackaProductMapper
 import pl.grizzlysoftware.dotykacka.client.v1.api.dto.product.Product
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -235,4 +236,23 @@ class DotykackaProductToCanonicalProductMapperTest extends Specification {
         where:
             containerType << ContainerType.values()
     }
+
+    @Unroll
+    def "maps isDiscountPermitted to isDiscountAllowed"(isDiscountPermitted, expectedOutput) {
+        given:
+            def input = new Product()
+            input.isDiscountPermitted = isDiscountPermitted
+            def m = new DotykackaProductToCanonicalProductMapper(Mock(CategoryProvider))
+        when:
+            def output = m.apply(input)
+        then:
+            output != null
+            output.isDiscountAllowed == expectedOutput
+        where:
+            isDiscountPermitted | expectedOutput
+            null                | false
+            false               | false
+            true                | true
+    }
+
 }

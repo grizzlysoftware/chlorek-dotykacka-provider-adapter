@@ -45,6 +45,7 @@ public class CanonicalProductToDotykackaProductMapper implements Function<Produc
         out.tagsList = toStringTagsMapper.apply(in.getTags().stream().map(tagWriter).collect(toList()));
         out.marginMin = in.minMargin == null ? null : in.minMargin.intValue();
         out.margin = toDotykackaMarginMapper.apply(in.margin, in.flatMargin);
+        out.isDiscountPermitted = in.isDiscountAllowed;
 
         return out;
     }

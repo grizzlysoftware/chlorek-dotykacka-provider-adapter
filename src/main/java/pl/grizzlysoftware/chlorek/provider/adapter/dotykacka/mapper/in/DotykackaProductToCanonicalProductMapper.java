@@ -7,6 +7,7 @@ import pl.grizzlysoftware.chlorek.core.resolver.ChlorekCsvTagParser;
 import pl.grizzlysoftware.chlorek.core.resolver.ContainerTypeTagValueResolver;
 import pl.grizzlysoftware.chlorek.core.resolver.TagParser;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
@@ -63,6 +64,7 @@ public class DotykackaProductToCanonicalProductMapper implements Function<pl.gri
             out.containerType = containerTypeTagValueResolver.resolve(out);
             out.margin = toMarginMapper.apply(in.margin);
             out.flatMargin = toFlatMarginMapper.apply(in.margin);
+            out.isDiscountAllowed = ofNullable(in.isDiscountPermitted).orElse(Boolean.FALSE);
             return out;
         } catch (Throwable e) {
             log.info("Exception while mapping Product: id={}, vat={}, name={}, tags={}", in.id, in.vat, in.name, in.tagsList);

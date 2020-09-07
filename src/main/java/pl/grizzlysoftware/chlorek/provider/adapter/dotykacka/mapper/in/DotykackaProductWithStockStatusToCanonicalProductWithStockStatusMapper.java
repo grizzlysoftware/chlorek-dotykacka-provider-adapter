@@ -63,6 +63,7 @@ public class DotykackaProductWithStockStatusToCanonicalProductWithStockStatusMap
         out.lastInventoryValue = in.lastInventoryValue;
         out.lastPurchaseNetPrice = with2Scale(in.lastPurchaseNetPrice);
         out.stockQuantity = in.stockQuantityStatus;
+        out.isDiscountAllowed = ofNullable(in.isDiscountPermitted).orElse(Boolean.FALSE);
         //out.warehouseId it is not applied here as it is hard to determine which warehouse it belongs to
         //TODO however this mapper is used to fetch product with stock status for GIVEN warehouseId so it should contain just 1 warehouse in it - check that out
 

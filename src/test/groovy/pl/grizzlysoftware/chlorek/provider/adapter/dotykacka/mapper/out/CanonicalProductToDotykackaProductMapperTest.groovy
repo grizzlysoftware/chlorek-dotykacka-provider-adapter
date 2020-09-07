@@ -182,6 +182,23 @@ class CanonicalProductToDotykackaProductMapperTest extends Specification {
             output.tagsList == "t1:99,t2,t3:52,t4"
     }
 
+    @Unroll
+    def "maps isDiscountAllowed to isDiscountPermitted"(isDiscountAllowed, expectedOutput) {
+        given:
+            def input = new Product()
+            input.isDiscountAllowed = isDiscountAllowed
+            def m = new CanonicalProductToDotykackaProductMapper()
+        when:
+            def output = m.apply(input)
+        then:
+            output != null
+            output.isDiscountPermitted == expectedOutput
+        where:
+            isDiscountAllowed | expectedOutput
+            false             | false
+            true              | true
+    }
+
     def "invokes while tags mapping"() {
         given:
             def input = new Product()

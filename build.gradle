@@ -12,7 +12,7 @@ ext."signing.secretKeyRingFile" = System.getenv("SIGNING_KEY_PATH")
 
 repositories {
     mavenCentral()
-    def localRepo = System.getenv('MVN_LOCAL_REPO')
+    def localRepo = '/opt/mvn-local-repo'
     if (localRepo != null) {
         maven {
             url 'file://' + localRepo

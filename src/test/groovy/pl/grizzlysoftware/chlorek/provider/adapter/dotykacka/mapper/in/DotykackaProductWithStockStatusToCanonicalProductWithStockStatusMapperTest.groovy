@@ -4,6 +4,7 @@ import pl.grizzlysoftware.chlorek.core.provider.CategoryProvider
 import pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.util.SingleStringTagsToCollectionStringTagsMapper
 import pl.grizzlysoftware.dotykacka.client.v1.api.dto.product.ProductWithStockStatus
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class DotykackaProductWithStockStatusToCanonicalProductWithStockStatusMapperTest extends Specification {
     def "throws NullPointerException when null arg is given"() {
@@ -24,6 +25,7 @@ class DotykackaProductWithStockStatusToCanonicalProductWithStockStatusMapperTest
             output == null
     }
 
+    //TODO refactor this shit before next release - 1.0.2
     def "maps properly"() {
         given:
             def input = new ProductWithStockStatus()
@@ -91,5 +93,23 @@ class DotykackaProductWithStockStatusToCanonicalProductWithStockStatusMapperTest
             output.lastInventoryValue == input.lastInventoryValue
             output.lastPurchaseNetPrice == 55.12
             output.stockQuantity == input.stockQuantityStatus
+    }
+
+    @Unroll
+    def "maps isDiscountPermitted to isDiscountAllowed"(isDiscountPermitted, expectedOutput) {
+        given:
+            def input = new ProductWithStockStatus()
+            input.isDiscountPermitted = isDiscountPermitted
+            def m = new DotykackaProductWithStockStatusToCanonicalProductWithStockStatusMapper(Mock(CategoryProvider))
+        when:
+            def output = m.apply(input)
+        then:
+            output != null
+            output.isDiscountAllowed == expectedOutput
+        where:
+            isDiscountPermitted | expectedOutput
+            null                | false
+            false               | false
+            true                | true
     }
 }
