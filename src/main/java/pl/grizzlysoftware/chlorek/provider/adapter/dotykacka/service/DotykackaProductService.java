@@ -100,6 +100,11 @@ public class DotykackaProductService implements ProductService {
     }
 
     @Override
+    public Collection<Product> getProductsByEan(String s) {
+        throw new UnsupportedOperationException("AND SHOULD NOT BE SUPPORTED - at least not now");
+    }
+
+    @Override
     public Product updateProduct(Product product) {
         var outDotykacka = toDotykackaProductMapper.apply(requireNonNull(product));
         var out = toCanonicalProductMapper.apply(productService.updateProduct(outDotykacka));

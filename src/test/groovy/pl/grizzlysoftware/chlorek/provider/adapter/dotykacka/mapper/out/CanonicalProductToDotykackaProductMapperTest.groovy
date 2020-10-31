@@ -1,7 +1,7 @@
 package pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.out
 
+import pl.grizzlysoftware.chlorek.core.model.KeyValueTag
 import pl.grizzlysoftware.chlorek.core.model.Product
-import pl.grizzlysoftware.chlorek.core.model.Tag
 import pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.util.TagsToStringTagsMapper
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -173,7 +173,7 @@ class CanonicalProductToDotykackaProductMapperTest extends Specification {
     def "maps tags properly"() {
         given:
             def input = new Product()
-            input.tags = [new Tag("t1", "99"), new Tag("t2"), new Tag("t3", "52"), new Tag("t4")]
+            input.tags = [new KeyValueTag("t1", "99"), new KeyValueTag("t2"), new KeyValueTag("t3", "52"), new KeyValueTag("t4")]
             def m = new CanonicalProductToDotykackaProductMapper()
         when:
             def output = m.apply(input)
@@ -202,7 +202,7 @@ class CanonicalProductToDotykackaProductMapperTest extends Specification {
     def "invokes while tags mapping"() {
         given:
             def input = new Product()
-            input.tags = [new Tag("t1", "99"), new Tag("t2"), new Tag("t3", "52"), new Tag("t4")]
+            input.tags = [new KeyValueTag("t1", "99"), new KeyValueTag("t2"), new KeyValueTag("t3", "52"), new KeyValueTag("t4")]
             def m = new CanonicalProductToDotykackaProductMapper()
             m.toStringTagsMapper = Mock(TagsToStringTagsMapper)
         when:

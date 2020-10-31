@@ -12,7 +12,7 @@ ext."signing.secretKeyRingFile" = System.getenv("SIGNING_KEY_PATH")
 
 repositories {
     mavenCentral()
-    def localRepo = '/opt/mvn-local-repo'
+    def localRepo = System.getenv('MVN_LOCAL_REPO')
     if (localRepo != null) {
         maven {
             url 'file://' + localRepo
@@ -147,8 +147,7 @@ signing {
 dependencies {
     implementation group: 'pl.grizzlysoftware', name: 'dotykacka-java-api-client', version: dotykackaApiJavaClientVersion
     implementation group: 'pl.grizzlysoftware', name: 'grizzlysoftware-commons', version: grizzlysoftwareCommonsVersion
-    implementation group: 'pl.grizzlysoftware.chlorek.core', name: 'chlorek-core-model', version: chlorekCoreModelVersion
-    implementation group: 'pl.grizzlysoftware.chlorek.core', name: 'chlorek-core-service', version: chlorekCoreServiceVersion
+    implementation group: 'pl.grizzlysoftware.chlorek.core', name: 'chlorek-core', version: chlorekCoreVersion
 
 
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: commonsLangVersion
