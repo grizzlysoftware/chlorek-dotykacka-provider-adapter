@@ -11,6 +11,7 @@ ext."signing.password" = System.getenv("SIGNING_KEY_PASSWORD")
 ext."signing.secretKeyRingFile" = System.getenv("SIGNING_KEY_PATH")
 
 repositories {
+    mavenLocal()
     mavenCentral()
     def localRepo = System.getenv('MVN_LOCAL_REPO')
     if (localRepo != null) {
