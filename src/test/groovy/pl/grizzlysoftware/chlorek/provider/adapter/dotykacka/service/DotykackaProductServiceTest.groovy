@@ -7,15 +7,53 @@ import pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.in.Dotykacka
 import pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.in.DotykackaProductWithStockStatusToCanonicalProductWithStockStatusMapper
 import pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.out.CanonicalProductIngredientToDotykackaProductIngredientMapper
 import pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.out.CanonicalProductToDotykackaProductMapper
-import pl.grizzlysoftware.dotykacka.client.v1.api.dto.product.Product
-import pl.grizzlysoftware.dotykacka.client.v1.api.dto.product.ProductWithStockStatus
-import pl.grizzlysoftware.dotykacka.client.v1.facade.ProductServiceFacade
+import pl.grizzlysoftware.dotykacka.client.v2.facade.ProductIngredientServiceFacade
+import pl.grizzlysoftware.dotykacka.client.v2.facade.WarehouseServiceFacade
+import pl.grizzlysoftware.dotykacka.client.v2.model.Product
+import pl.grizzlysoftware.dotykacka.client.v2.model.ProductStock
+import pl.grizzlysoftware.dotykacka.client.v2.facade.ProductServiceFacade
+import pl.grizzlysoftware.dotykacka.client.v2.model.ResultPage
+import pl.grizzlysoftware.dotykacka.client.v2.model.Unit
 import spock.lang.Specification
 
 class DotykackaProductServiceTest extends Specification {
+
+    CategoryProvider categoryProvider
+    ProductServiceFacade productService
+    ProductIngredientServiceFacade productIngredientService
+    WarehouseServiceFacade warehouseService
+
+    def setup() {
+        def products = [
+                Mock(Product), Mock(Product),
+                Mock(Product), Mock(Product),
+                Mock(Product), Mock(Product)
+        ]
+        def result = new ResultPage()
+        result.data = products
+        categoryProvider = Mock(CategoryProvider) {
+            getCategory(_) >> new Category()
+        }
+        productService = Mock(ProductServiceFacade) {
+            getProducts(_, _, _) >> result
+            getProducts(_, _, _, _, _) >> result
+            getAllProducts(_) >> products
+        }
+        productIngredientService = Mock(ProductIngredientServiceFacade) {
+
+        }
+        warehouseService = Mock(WarehouseServiceFacade) {
+            getProductStocks(_) >> [
+                    Mock(ProductStock), Mock(ProductStock),
+                    Mock(ProductStock), Mock(ProductStock),
+                    Mock(ProductStock), Mock(ProductStock)
+            ]
+        }
+    }
+
     def "throws exception when given args are null"(categoryProvider, productService) {
         when:
-            new DotykackaProductService(categoryProvider, productService)
+            new DotykackaProductService(categoryProvider, productService, null, null)
         then:
             thrown(NullPointerException)
         where:
@@ -27,17 +65,7 @@ class DotykackaProductServiceTest extends Specification {
 
     def "returns products with stock status #1"() {
         given:
-            def categoryProvider = Mock(CategoryProvider) {
-                getCategory(_) >> new Category()
-            }
-            def productService = Mock(ProductServiceFacade) {
-                getProductsWithStockStatus(_, _) >> [
-                        Mock(ProductWithStockStatus), Mock(ProductWithStockStatus),
-                        Mock(ProductWithStockStatus), Mock(ProductWithStockStatus),
-                        Mock(ProductWithStockStatus), Mock(ProductWithStockStatus)
-                ]
-            }
-            def m = new DotykackaProductService(categoryProvider, productService)
+            def m = new DotykackaProductService(categoryProvider, productService, productIngredientService, warehouseService)
         when:
             def out = m.getProductsWithStockStatus(0, null)
         then:
@@ -47,17 +75,7 @@ class DotykackaProductServiceTest extends Specification {
 
     def "returns products with stock status #2"() {
         given:
-            def categoryProvider = Mock(CategoryProvider) {
-                getCategory(_) >> new Category()
-            }
-            def productService = Mock(ProductServiceFacade) {
-                getProductsWithStockStatus(_, _, _, _) >> [
-                        Mock(ProductWithStockStatus), Mock(ProductWithStockStatus),
-                        Mock(ProductWithStockStatus), Mock(ProductWithStockStatus),
-                        Mock(ProductWithStockStatus), Mock(ProductWithStockStatus)
-                ]
-            }
-            def m = new DotykackaProductService(categoryProvider, productService)
+            def m = new DotykackaProductService(categoryProvider, productService, productIngredientService, warehouseService)
         when:
             def out = m.getProductsWithStockStatus(0, 0, 0, null)
         then:
@@ -65,40 +83,19 @@ class DotykackaProductServiceTest extends Specification {
             out.size() == 6
     }
 
-    def "invokes toCanonicalProductWithStockStatusMapper for each existing ProductWithStockStatus #1"() {
+    def "invokes toCanonicalProductWithStockStatusMapper for each existing ProductStock #1"() {
         given:
-            def categoryProvider = Mock(CategoryProvider) {
-                getCategory(_) >> new Category()
-            }
-            def productService = Mock(ProductServiceFacade) {
-                getProductsWithStockStatus(_, _) >> [
-                        Mock(ProductWithStockStatus), Mock(ProductWithStockStatus),
-                        Mock(ProductWithStockStatus), Mock(ProductWithStockStatus),
-                        Mock(ProductWithStockStatus), Mock(ProductWithStockStatus)
-                ]
-            }
-            def m = new DotykackaProductService(categoryProvider, productService)
+            def m = new DotykackaProductService(categoryProvider, productService, productIngredientService, warehouseService)
             m.toCanonicalProductWithStockStatusMapper = Mock(DotykackaProductWithStockStatusToCanonicalProductWithStockStatusMapper)
-
         when:
             def out = m.getProductsWithStockStatus(0, null)
         then:
             6 * m.toCanonicalProductWithStockStatusMapper.apply(_)
     }
 
-    def "invokes toCanonicalProductWithStockStatusMapper for each existing ProductWithStockStatus #2"() {
+    def "invokes toCanonicalProductWithStockStatusMapper for each existing ProductStock #2"() {
         given:
-            def categoryProvider = Mock(CategoryProvider) {
-                getCategory(_) >> new Category()
-            }
-            def productService = Mock(ProductServiceFacade) {
-                getProductsWithStockStatus(_, _, _, _) >> [
-                        Mock(ProductWithStockStatus), Mock(ProductWithStockStatus),
-                        Mock(ProductWithStockStatus), Mock(ProductWithStockStatus),
-                        Mock(ProductWithStockStatus), Mock(ProductWithStockStatus)
-                ]
-            }
-            def m = new DotykackaProductService(categoryProvider, productService)
+            def m = new DotykackaProductService(categoryProvider, productService, productIngredientService, warehouseService)
             m.toCanonicalProductWithStockStatusMapper = Mock(DotykackaProductWithStockStatusToCanonicalProductWithStockStatusMapper)
         when:
             def out = m.getProductsWithStockStatus(0, 0, 0, null)
@@ -108,17 +105,7 @@ class DotykackaProductServiceTest extends Specification {
 
     def "returns products #1"() {
         given:
-            def categoryProvider = Mock(CategoryProvider) {
-                getCategory(_) >> new Category()
-            }
-            def productService = Mock(ProductServiceFacade) {
-                getProducts(_) >> [
-                        Mock(Product), Mock(Product),
-                        Mock(Product), Mock(Product),
-                        Mock(Product), Mock(Product)
-                ]
-            }
-            def m = new DotykackaProductService(categoryProvider, productService)
+            def m = new DotykackaProductService(categoryProvider, productService, productIngredientService, warehouseService)
         when:
             def out = m.getProducts(null)
         then:
@@ -128,17 +115,7 @@ class DotykackaProductServiceTest extends Specification {
 
     def "returns products #2"() {
         given:
-            def categoryProvider = Mock(CategoryProvider) {
-                getCategory(_) >> new Category()
-            }
-            def productService = Mock(ProductServiceFacade) {
-                getProducts(_, _, _) >> [
-                        Mock(Product), Mock(Product),
-                        Mock(Product), Mock(Product),
-                        Mock(Product), Mock(Product)
-                ]
-            }
-            def m = new DotykackaProductService(categoryProvider, productService)
+            def m = new DotykackaProductService(categoryProvider, productService, productIngredientService, warehouseService)
         when:
             def out = m.getProducts(0, 0, null)
         then:
@@ -148,17 +125,7 @@ class DotykackaProductServiceTest extends Specification {
 
     def "invokes toCanonicalProductMapper for each existing Product #1"() {
         given:
-            def categoryProvider = Mock(CategoryProvider) {
-                getCategory(_) >> new Category()
-            }
-            def productService = Mock(ProductServiceFacade) {
-                getProducts(_) >> [
-                        Mock(Product), Mock(Product),
-                        Mock(Product), Mock(Product),
-                        Mock(Product), Mock(Product)
-                ]
-            }
-            def m = new DotykackaProductService(categoryProvider, productService)
+            def m = new DotykackaProductService(categoryProvider, productService, productIngredientService, warehouseService)
             m.toCanonicalProductMapper = Mock(DotykackaProductToCanonicalProductMapper)
         when:
             def out = m.getProducts(null)
@@ -168,17 +135,7 @@ class DotykackaProductServiceTest extends Specification {
 
     def "invokes toCanonicalProductMapper for each existing Product #2"() {
         given:
-            def categoryProvider = Mock(CategoryProvider) {
-                getCategory(_) >> new Category()
-            }
-            def productService = Mock(ProductServiceFacade) {
-                getProducts(_, _, _) >> [
-                        Mock(Product), Mock(Product),
-                        Mock(Product), Mock(Product),
-                        Mock(Product), Mock(Product)
-                ]
-            }
-            def m = new DotykackaProductService(categoryProvider, productService)
+            def m = new DotykackaProductService(categoryProvider, productService, productIngredientService, warehouseService)
             m.toCanonicalProductMapper = Mock(DotykackaProductToCanonicalProductMapper)
         when:
             def out = m.getProducts(0, 0, null)
@@ -191,7 +148,7 @@ class DotykackaProductServiceTest extends Specification {
             def productService = Mock(ProductServiceFacade) {
                 createProduct(_) >> new Product()
             }
-            def m = new DotykackaProductService(Mock(CategoryProvider), productService)
+            def m = new DotykackaProductService(Mock(CategoryProvider), productService, productIngredientService, warehouseService)
         when:
             def out = m.createProduct(new pl.grizzlysoftware.chlorek.core.model.Product())
         then:
@@ -200,7 +157,7 @@ class DotykackaProductServiceTest extends Specification {
 
     def "invokes toDotykackaProductMapper and toCanonicalProductMapper when creating product"() {
         given:
-            def m = new DotykackaProductService(Mock(CategoryProvider), Mock(ProductServiceFacade))
+            def m = new DotykackaProductService(Mock(CategoryProvider), Mock(ProductServiceFacade), productIngredientService, warehouseService)
             m.toDotykackaProductMapper = Mock(CanonicalProductToDotykackaProductMapper)
             m.toCanonicalProductMapper = Mock(DotykackaProductToCanonicalProductMapper)
         when:
@@ -218,7 +175,7 @@ class DotykackaProductServiceTest extends Specification {
             def productService = Mock(ProductServiceFacade) {
                 createProduct(_) >> new Product()
             }
-            def m = new DotykackaProductService(Mock(CategoryProvider), productService)
+            def m = new DotykackaProductService(Mock(CategoryProvider), productService, productIngredientService, warehouseService)
         when:
             def out = m.createProduct(null)
         then:
@@ -230,7 +187,7 @@ class DotykackaProductServiceTest extends Specification {
             def productService = Mock(ProductServiceFacade) {
                 deleteProduct(_) >> new Product()
             }
-            def m = new DotykackaProductService(Mock(CategoryProvider), productService)
+            def m = new DotykackaProductService(Mock(CategoryProvider), productService, productIngredientService, warehouseService)
         when:
             def out = m.deleteProduct(1L)
         then:
@@ -239,7 +196,7 @@ class DotykackaProductServiceTest extends Specification {
 
     def "invokes productService.deleteProduct and toCanonicalProductMapper while deleting product"() {
         given:
-            def m = new DotykackaProductService(Mock(CategoryProvider), Mock(ProductServiceFacade))
+            def m = new DotykackaProductService(Mock(CategoryProvider), Mock(ProductServiceFacade), productIngredientService, warehouseService)
             m.toCanonicalProductMapper = Mock(DotykackaProductToCanonicalProductMapper)
         when:
             def out = m.deleteProduct(1L)
@@ -253,7 +210,7 @@ class DotykackaProductServiceTest extends Specification {
 
     def "throws NullPointerException when given product is null arg while deleting product"() {
         given:
-            def m = new DotykackaProductService(Mock(CategoryProvider), Mock(ProductServiceFacade))
+            def m = new DotykackaProductService(Mock(CategoryProvider), Mock(ProductServiceFacade), productIngredientService, warehouseService)
         when:
             def out = m.deleteProduct(null)
         then:
@@ -262,28 +219,33 @@ class DotykackaProductServiceTest extends Specification {
 
     def "creates product ingredient"() {
         given:
-            def m = new DotykackaProductService(Mock(CategoryProvider), Mock(ProductServiceFacade))
+            def m = new DotykackaProductService(Mock(CategoryProvider), Mock(ProductServiceFacade), productIngredientService, warehouseService)
+            def ingredient = new ProductIngredient()
+            ingredient.id = 5000L
+            ingredient.productId = 2137L
+            ingredient.unit = Unit.Gram.toString()
+            ingredient.quantity = 21.37
         when:
-            m.createProductIngredient(Mock(ProductIngredient))
+            m.createProductIngredient(ingredient)
         then:
             1 == 1
     }
 
     def "invokes toDotykackaProductIngredientMapper and productService.createProductIngredient while creating product ingredient"() {
         given:
-            def m = new DotykackaProductService(Mock(CategoryProvider), Mock(ProductServiceFacade))
+            def m = new DotykackaProductService(Mock(CategoryProvider), Mock(ProductServiceFacade), productIngredientService, warehouseService)
             m.toDotykackaProductIngredientMapper = Mock(CanonicalProductIngredientToDotykackaProductIngredientMapper)
         when:
             m.createProductIngredient(Mock(ProductIngredient))
         then:
             1 * m.toDotykackaProductIngredientMapper.apply(_)
         then:
-            1 * m.productService.createProductIngredient(_)
+            1 * m.productIngredientServiceFacade.createProductIngredient(_)
     }
 
     def "throws NullPointerException when ProductIngredient is null"() {
         given:
-            def m = new DotykackaProductService(Mock(CategoryProvider), Mock(ProductServiceFacade))
+            def m = new DotykackaProductService(Mock(CategoryProvider), Mock(ProductServiceFacade), productIngredientService, warehouseService)
         when:
             m.createProductIngredient(null)
         then:
@@ -292,17 +254,17 @@ class DotykackaProductServiceTest extends Specification {
 
     def "gets product"() {
         given:
-            def m = new DotykackaProductService(Mock(CategoryProvider), Mock(ProductServiceFacade))
+            def m = new DotykackaProductService(Mock(CategoryProvider), Mock(ProductServiceFacade), productIngredientService, warehouseService)
             m.productService.getProduct(_) >> new Product()
         when:
             def out = m.getProduct(1L)
         then:
             out != null
     }
-    
+
     def "invokes productService.getProduct(_) and toCanonicalProductMapper while getting product"() {
         given:
-            def m = new DotykackaProductService(Mock(CategoryProvider), Mock(ProductServiceFacade))
+            def m = new DotykackaProductService(Mock(CategoryProvider), Mock(ProductServiceFacade), productIngredientService, warehouseService)
             m.toCanonicalProductMapper = Mock(DotykackaProductToCanonicalProductMapper)
         when:
             def out = m.getProduct(1L)
@@ -314,7 +276,7 @@ class DotykackaProductServiceTest extends Specification {
 
     def "throws NullPointerException when given id is null while getting the product"() {
         given:
-            def m = new DotykackaProductService(Mock(CategoryProvider), Mock(ProductServiceFacade))
+            def m = new DotykackaProductService(Mock(CategoryProvider), Mock(ProductServiceFacade), productIngredientService, warehouseService)
         when:
             m.getProduct(null)
         then:
@@ -326,7 +288,7 @@ class DotykackaProductServiceTest extends Specification {
             def productService = Mock(ProductServiceFacade) {
                 updateProduct(_) >> new Product()
             }
-            def m = new DotykackaProductService(Mock(CategoryProvider), productService)
+            def m = new DotykackaProductService(Mock(CategoryProvider), productService, productIngredientService, warehouseService)
         when:
             def out = m.updateProduct(new pl.grizzlysoftware.chlorek.core.model.Product())
         then:
@@ -335,7 +297,7 @@ class DotykackaProductServiceTest extends Specification {
 
     def "invokes toDotykackaProductMapper and toCanonicalProductMapper when updating product"() {
         given:
-            def m = new DotykackaProductService(Mock(CategoryProvider), Mock(ProductServiceFacade))
+            def m = new DotykackaProductService(Mock(CategoryProvider), Mock(ProductServiceFacade), productIngredientService, warehouseService)
             m.toDotykackaProductMapper = Mock(CanonicalProductToDotykackaProductMapper)
             m.toCanonicalProductMapper = Mock(DotykackaProductToCanonicalProductMapper)
         when:
@@ -353,7 +315,7 @@ class DotykackaProductServiceTest extends Specification {
             def productService = Mock(ProductServiceFacade) {
                 updateProduct(_) >> new Product()
             }
-            def m = new DotykackaProductService(Mock(CategoryProvider), productService)
+            def m = new DotykackaProductService(Mock(CategoryProvider), productService, productIngredientService, warehouseService)
         when:
             def out = m.updateProduct(null)
         then:

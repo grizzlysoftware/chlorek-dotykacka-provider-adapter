@@ -1,5 +1,6 @@
 package pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.service;
 
+import lombok.extern.slf4j.Slf4j;
 import pl.grizzlysoftware.chlorek.core.model.Product;
 import pl.grizzlysoftware.chlorek.core.model.ProductIngredient;
 import pl.grizzlysoftware.chlorek.core.model.ProductWithStockStatus;
@@ -9,7 +10,9 @@ import pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.in.Dotykacka
 import pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.in.DotykackaProductWithStockStatusToCanonicalProductWithStockStatusMapper;
 import pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.out.CanonicalProductIngredientToDotykackaProductIngredientMapper;
 import pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.out.CanonicalProductToDotykackaProductMapper;
-import pl.grizzlysoftware.dotykacka.client.v1.facade.ProductServiceFacade;
+import pl.grizzlysoftware.dotykacka.client.v2.facade.ProductIngredientServiceFacade;
+import pl.grizzlysoftware.dotykacka.client.v2.facade.ProductServiceFacade;
+import pl.grizzlysoftware.dotykacka.client.v2.facade.WarehouseServiceFacade;
 
 import java.util.Collection;
 
@@ -19,16 +22,24 @@ import static java.util.stream.Collectors.toList;
 /**
  * @author Bartosz Pawłowski, bpawlowski@grizzlysoftware.pl
  */
+@Slf4j
 public class DotykackaProductService implements ProductService {
 
     private ProductServiceFacade productService;
+    private ProductIngredientServiceFacade productIngredientServiceFacade;
+    private WarehouseServiceFacade warehouseServiceFacade;
+
+
     private DotykackaProductWithStockStatusToCanonicalProductWithStockStatusMapper toCanonicalProductWithStockStatusMapper;
     private DotykackaProductToCanonicalProductMapper toCanonicalProductMapper;
     private CanonicalProductToDotykackaProductMapper toDotykackaProductMapper;
     private CanonicalProductIngredientToDotykackaProductIngredientMapper toDotykackaProductIngredientMapper;
 
-    public DotykackaProductService(CategoryProvider categoryProvider, ProductServiceFacade service) {
+    public DotykackaProductService(CategoryProvider categoryProvider, ProductServiceFacade service,
+                                   ProductIngredientServiceFacade productIngredientServiceFacade, WarehouseServiceFacade warehouseServiceFacade) {
         this.productService = requireNonNull(service);
+        this.productIngredientServiceFacade = requireNonNull(productIngredientServiceFacade);
+        this.warehouseServiceFacade = requireNonNull(warehouseServiceFacade);
 
         this.toCanonicalProductWithStockStatusMapper = new DotykackaProductWithStockStatusToCanonicalProductWithStockStatusMapper(categoryProvider);
         this.toCanonicalProductMapper = new DotykackaProductToCanonicalProductMapper(categoryProvider);
@@ -38,7 +49,8 @@ public class DotykackaProductService implements ProductService {
 
     @Override
     public Collection<ProductWithStockStatus> getProductsWithStockStatus(long warehouseId, String sort) {
-        var out = this.productService.getProductsWithStockStatus(warehouseId, sort)
+        var out = this.warehouseServiceFacade.getProductStocks(warehouseId, 0, 100, null, sort)
+                .data
                 .stream()
                 .map(toCanonicalProductWithStockStatusMapper)
                 .collect(toList());
@@ -46,8 +58,9 @@ public class DotykackaProductService implements ProductService {
     }
 
     @Override
-    public Collection<ProductWithStockStatus> getProductsWithStockStatus(long warehouseId, int limit, int offset, String sort) {
-        var out = this.productService.getProductsWithStockStatus(warehouseId, limit, offset, sort)
+    public Collection<ProductWithStockStatus> getProductsWithStockStatus(long warehouseId, int page, int pageSize, String sort) {
+        var out = this.warehouseServiceFacade.getProductStocks(warehouseId, page, pageSize, null, sort)
+                .data
                 .stream()
                 .map(toCanonicalProductWithStockStatusMapper)
                 .collect(toList());
@@ -56,7 +69,7 @@ public class DotykackaProductService implements ProductService {
 
     @Override
     public Collection<Product> getProducts(String sort) {
-        var out = this.productService.getProducts(sort)
+        var out = this.productService.getAllProducts(sort)
                 .stream()
                 .map(toCanonicalProductMapper)
                 .collect(toList());
@@ -64,8 +77,9 @@ public class DotykackaProductService implements ProductService {
     }
 
     @Override
-    public Collection<Product> getProducts(int limit, int offset, String sort) {
-        var out = this.productService.getProducts(limit, offset, sort)
+    public Collection<Product> getProducts(int page, int pageSize, String sort) {
+        var out = this.productService.getProducts(page + 1, pageSize, null, null, sort)
+                .data
                 .stream()
                 .map(toCanonicalProductMapper)
                 .collect(toList());
@@ -90,7 +104,7 @@ public class DotykackaProductService implements ProductService {
     @Override
     public void createProductIngredient(ProductIngredient in) {
         var out = toDotykackaProductIngredientMapper.apply(requireNonNull(in));
-        productService.createProductIngredient(out);
+        productIngredientServiceFacade.createProductIngredient(out);
     }
 
     @Override
@@ -101,7 +115,10 @@ public class DotykackaProductService implements ProductService {
 
     @Override
     public Collection<Product> getProductsByEan(String s) {
-        throw new UnsupportedOperationException("AND SHOULD NOT BE SUPPORTED - at least not now");
+        return productService.getAllProducts("", "ean=" + s, null)
+                .stream()
+                .map(toCanonicalProductMapper)
+                .collect(toList());
     }
 
     @Override

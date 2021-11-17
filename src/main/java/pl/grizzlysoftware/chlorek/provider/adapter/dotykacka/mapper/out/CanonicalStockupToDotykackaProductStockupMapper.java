@@ -1,7 +1,7 @@
 package pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.out;
 
 import pl.grizzlysoftware.chlorek.core.model.Stockup;
-import pl.grizzlysoftware.dotykacka.client.v1.api.dto.ProductStockup;
+import pl.grizzlysoftware.dotykacka.client.v2.model.WarehouseStockUp;
 
 import java.util.function.Function;
 
@@ -12,7 +12,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * @author Bartosz Pawłowski, bpawlowski@grizzlysoftware.pl
  */
-public class CanonicalStockupToDotykackaProductStockupMapper implements Function<Stockup, ProductStockup> {
+public class CanonicalStockupToDotykackaProductStockupMapper implements Function<Stockup, WarehouseStockUp> {
 
     private CanonicalInvoiceItemToDotykackaProductStockupItemMapper mapper;
 
@@ -20,18 +20,23 @@ public class CanonicalStockupToDotykackaProductStockupMapper implements Function
         this.mapper = new CanonicalInvoiceItemToDotykackaProductStockupItemMapper();
     }
 
+    CanonicalStockupToDotykackaProductStockupMapper(CanonicalInvoiceItemToDotykackaProductStockupItemMapper mapper) {
+        this.mapper = mapper;
+    }
+
     @Override
-    public ProductStockup apply(Stockup in) {
+    public WarehouseStockUp apply(Stockup in) {
         if (in == null) {
             return null;
         }
 
-        var out = new ProductStockup();
-        out.updateSellPrice = true;
+        var out = new WarehouseStockUp();
+        out.updateProductPurchasePrice = true;
+        out.warehouseId = in.warehouseId;
         out.invoiceNumber = in.invoice.number;
         out.note = in.notes;
         out.supplierId = in.invoice.supplierId;
-        out.stockupItems = ofNullable(in.invoice.items)
+        out.items = ofNullable(in.invoice.items)
                 .orElse(emptyList())
                 .stream()
                 .map(mapper)

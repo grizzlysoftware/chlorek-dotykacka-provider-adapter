@@ -1,6 +1,6 @@
 package pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.in;
 
-import pl.grizzlysoftware.dotykacka.client.v1.api.dto.branch.Branch;
+import pl.grizzlysoftware.dotykacka.client.v2.model.Branch;
 
 import java.util.function.Function;
 
@@ -16,6 +16,7 @@ public class DotykackaBranchToCanonicalBranchMapper implements Function<Branch, 
 
         var out = new pl.grizzlysoftware.chlorek.core.model.Branch();
         out.id = in.id;
+        out.etag = in.etag;
         out.cloudId = in.cloudId == null ? null : in.cloudId.intValue();
         out.name = in.name;
 

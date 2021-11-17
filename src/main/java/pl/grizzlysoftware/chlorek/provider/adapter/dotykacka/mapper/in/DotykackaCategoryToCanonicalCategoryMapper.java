@@ -1,6 +1,6 @@
 package pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.in;
 
-import pl.grizzlysoftware.dotykacka.client.v1.api.dto.category.Category;
+import pl.grizzlysoftware.dotykacka.client.v2.model.Category;
 
 import java.util.function.Function;
 
@@ -23,9 +23,11 @@ public class DotykackaCategoryToCanonicalCategoryMapper implements Function<Cate
         var out = new pl.grizzlysoftware.chlorek.core.model.Category();
         out.id = in.id;
         out.cloudId = in.cloudId == null ? null : in.cloudId.intValue();
+        out.etag = in.etag;
         out.name = in.name;
         out.vat = vatMapper.apply(in.vat);
-        out.isFiscalizationEnabled = in.fiscalizationDisabled == null || in.fiscalizationDisabled == 0;
+//        out.isFiscalizationEnabled = in.fiscalizationDisabled == null || in.fiscalizationDisabled == 0;
+        //it is now represented by 8th bit flag
         out.isDisplayed = in.isDisplayed == null ? false : in.isDisplayed;
         out.isDeleted = in.isDeleted == null ? false : in.isDeleted;
         return out;

@@ -3,7 +3,7 @@ package pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.service;
 import pl.grizzlysoftware.chlorek.core.model.Supplier;
 import pl.grizzlysoftware.chlorek.core.service.SupplierService;
 import pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.in.DotykackaSupplierToCanonicalSupplierMapper;
-import pl.grizzlysoftware.dotykacka.client.v1.facade.SupplierServiceFacade;
+import pl.grizzlysoftware.dotykacka.client.v2.facade.SupplierServiceFacade;
 
 import java.util.Collection;
 

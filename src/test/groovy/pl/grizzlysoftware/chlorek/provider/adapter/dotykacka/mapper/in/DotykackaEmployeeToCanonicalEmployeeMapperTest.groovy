@@ -1,6 +1,6 @@
 package pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.in
 
-import pl.grizzlysoftware.dotykacka.client.v1.api.dto.Employee
+import pl.grizzlysoftware.dotykacka.client.v2.model.Employee
 import spock.lang.Specification;
 
 class DotykackaEmployeeToCanonicalEmployeeMapperTest extends Specification {
@@ -21,6 +21,7 @@ class DotykackaEmployeeToCanonicalEmployeeMapperTest extends Specification {
             input.name = "employee 1"
             input.isEnabled = isEnabled
             input.isDeleted = isDeleted
+            input.etag = UUID.randomUUID().toString()
             def m = new DotykackaEmployeeToCanonicalEmployeeMapper()
         when:
             def output = m.apply(input)
@@ -28,6 +29,7 @@ class DotykackaEmployeeToCanonicalEmployeeMapperTest extends Specification {
             output != null
             output.id == input.id
             output.cloudId == input.cloudId
+            output.etag == input.etag
             output.name == input.name
             output.ean == input.barcode
             output.phone == input.phone

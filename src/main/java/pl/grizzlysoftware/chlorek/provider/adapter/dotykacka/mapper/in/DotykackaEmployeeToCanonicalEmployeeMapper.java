@@ -1,6 +1,6 @@
 package pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.in;
 
-import pl.grizzlysoftware.dotykacka.client.v1.api.dto.Employee;
+import pl.grizzlysoftware.dotykacka.client.v2.model.Employee;
 
 import java.util.function.Function;
 
@@ -17,6 +17,7 @@ public class DotykackaEmployeeToCanonicalEmployeeMapper implements Function<Empl
         var out = new pl.grizzlysoftware.chlorek.core.model.Employee();
         out.id = in.id;
         out.cloudId = in.cloudId == null ? null : in.cloudId.intValue();
+        out.etag = in.etag;
         out.name = in.name;
         out.ean = in.barcode;
         out.phone = in.phone;

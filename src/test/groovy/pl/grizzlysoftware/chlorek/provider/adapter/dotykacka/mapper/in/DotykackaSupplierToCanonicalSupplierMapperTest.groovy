@@ -1,6 +1,8 @@
 package pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.in
 
-import pl.grizzlysoftware.dotykacka.client.v1.api.dto.Supplier
+import pl.grizzlysoftware.dotykacka.client.v2.model.Address
+import pl.grizzlysoftware.dotykacka.client.v2.model.Contact
+import pl.grizzlysoftware.dotykacka.client.v2.model.Supplier
 import spock.lang.Specification
 
 class DotykackaSupplierToCanonicalSupplierMapperTest extends Specification {
@@ -21,14 +23,17 @@ class DotykackaSupplierToCanonicalSupplierMapperTest extends Specification {
             input.cloudId = 14L
             input.companyId = 16L
             input.vatId = "12331313"
-            input.vatNo = "33338111"
+            input.etag = UUID.randomUUID().toString()
             input.name = "Test Supplier 1"
-            input.phone = "58888"
-            input.address1 = "Address 1"
-            input.address2 = "Address 2"
-            input.countryCode = "Country Code"
-            input.city = "City"
-            input.zip = "Zip code"
+            input.contact = new Contact()
+            input.contact.phoneNumber = "58888"
+//            input.contact.email = "supplier@test.com"
+            input.address = new Address()
+            input.address.addressLine1 = "Address 1"
+            input.address.addressLine2 = "Address 2"
+            input.address.country = "Country"
+            input.address.city = "City"
+            input.address.zipCode = "Zip code"
             input.isDeleted = true
             def m = new DotykackaSupplierToCanonicalSupplierMapper()
         when:
@@ -40,14 +45,16 @@ class DotykackaSupplierToCanonicalSupplierMapperTest extends Specification {
             output.cloudId == input.cloudId
             output.companyId == input.companyId
             output.vatId == input.vatId
-            output.vatNumber == input.vatNo
+            output.vatNumber == input.vatId
+            output.etag == input.etag
             output.name == input.name
-            output.phone == input.phone
-            output.address1 == input.address1
-            output.address2 == input.address2
-            output.countryCode == input.countryCode
-            output.city == input.city
-            output.zipCode == input.zip
+            output.phone == input.contact.phoneNumber
+//            output.email == input.contact.email
+            output.address1 == input.address.addressLine1
+            output.address2 == input.address.addressLine2
+            output.countryCode == input.address.country
+            output.city == input.address.city
+            output.zipCode == input.address.zipCode
             output.isDeleted == input.isDeleted
     }
 }

@@ -1,6 +1,6 @@
 package pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.in;
 
-import pl.grizzlysoftware.dotykacka.client.v1.api.dto.Warehouse;
+import pl.grizzlysoftware.dotykacka.client.v2.model.Warehouse;
 
 import java.util.function.Function;
 
@@ -16,7 +16,7 @@ public class DotykackaWarehouseToCanonicalWarehouseMapper implements Function<Wa
 
         var out = new pl.grizzlysoftware.chlorek.core.model.Warehouse();
         out.id = in.id;
-        out.cloudId = in.cloudiId;
+        out.cloudId = in.cloudId == null ? null : in.cloudId.intValue();
         out.name = in.name;
         return out;
     }

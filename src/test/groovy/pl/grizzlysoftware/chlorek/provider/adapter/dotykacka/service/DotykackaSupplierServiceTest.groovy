@@ -2,8 +2,8 @@ package pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.service
 
 import org.apache.commons.lang3.StringUtils
 import pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.in.DotykackaSupplierToCanonicalSupplierMapper
-import pl.grizzlysoftware.dotykacka.client.v1.api.dto.Supplier
-import pl.grizzlysoftware.dotykacka.client.v1.facade.SupplierServiceFacade;
+import pl.grizzlysoftware.dotykacka.client.v2.model.Supplier
+import pl.grizzlysoftware.dotykacka.client.v2.facade.SupplierServiceFacade;
 import spock.lang.Specification
 
 import static java.util.stream.Collectors.toList

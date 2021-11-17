@@ -1,7 +1,8 @@
 package pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.out
 
 import pl.grizzlysoftware.chlorek.core.model.ProductIngredient
-import spock.lang.Specification;
+import pl.grizzlysoftware.dotykacka.client.v2.model.Unit
+import spock.lang.Specification
 
 class CanonicalProductIngredientToDotykackaProductIngredientMapperTest extends Specification {
     def "returns null for given null input"() {
@@ -19,7 +20,8 @@ class CanonicalProductIngredientToDotykackaProductIngredientMapperTest extends S
             input.id = 10L
             input.productId = 15L
             input.quantity = 55
-            input.unit = "unit 1"
+            input.unit = Unit.Deciliter.toString()
+            input.etag = UUID.randomUUID().toString()
             def m = new CanonicalProductIngredientToDotykackaProductIngredientMapper()
         when:
             def output = m.apply(input)
@@ -28,6 +30,7 @@ class CanonicalProductIngredientToDotykackaProductIngredientMapperTest extends S
             output.ingredientId == input.id
             output.productId == input.productId
             output.quantity == input.quantity
-            output.unit == input.unit
+            output.unit == Unit.valueOf(input.unit)
+            output.etag == input.etag
     }
 }

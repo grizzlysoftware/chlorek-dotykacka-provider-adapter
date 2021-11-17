@@ -1,25 +1,23 @@
 package pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.out;
 
 import pl.grizzlysoftware.chlorek.core.model.InvoiceItem;
-import pl.grizzlysoftware.dotykacka.client.v1.api.dto.ProductStockupItem;
+import pl.grizzlysoftware.dotykacka.client.v2.model.StockUpItem;
 
 import java.util.function.Function;
-
-import static pl.grizzlysoftware.commons.NumberUtils.safeDouble;
 
 /**
  * @author Bartosz Pawłowski, bpawlowski@grizzlysoftware.pl
  */
-public class CanonicalInvoiceItemToDotykackaProductStockupItemMapper implements Function<InvoiceItem, ProductStockupItem> {
+public class CanonicalInvoiceItemToDotykackaProductStockupItemMapper implements Function<InvoiceItem, StockUpItem> {
     @Override
-    public ProductStockupItem apply(InvoiceItem in) {
+    public StockUpItem apply(InvoiceItem in) {
         if (in == null) {
             return null;
         }
-        var out = new ProductStockupItem();
+        var out = new StockUpItem();
         out.productId = in.itemId;
-        out.grossSellPrice = safeDouble(in.grossSellPrice);
-        out.netPurchasePrice = safeDouble(in.netPurchasePrice);
+        out.sellPrice = in.grossSellPrice;
+        out.purchasePrice = in.netPurchasePrice;
         out.quantity = in.quantity;
         return out;
     }

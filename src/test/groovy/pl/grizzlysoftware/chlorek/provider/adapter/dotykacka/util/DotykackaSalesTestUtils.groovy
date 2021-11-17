@@ -1,7 +1,7 @@
 package pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.util
 
 
-import pl.grizzlysoftware.dotykacka.client.v1.api.dto.Employee
+import pl.grizzlysoftware.dotykacka.client.v2.model.Employee
 
 /**
  * @author Bartosz Pawłowski, bpawlowski@grizzlysoftware.pl

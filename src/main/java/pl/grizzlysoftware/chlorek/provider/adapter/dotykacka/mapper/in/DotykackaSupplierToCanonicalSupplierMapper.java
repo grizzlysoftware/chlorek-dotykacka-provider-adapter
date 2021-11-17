@@ -1,6 +1,6 @@
 package pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.in;
 
-import pl.grizzlysoftware.dotykacka.client.v1.api.dto.Supplier;
+import pl.grizzlysoftware.dotykacka.client.v2.model.Supplier;
 
 import java.util.function.Function;
 
@@ -19,16 +19,24 @@ public class DotykackaSupplierToCanonicalSupplierMapper implements Function<Supp
         out.externalId = in.externalId;
         out.cloudId = in.cloudId == null ? null : in.cloudId.intValue();
         out.companyId = in.companyId;
+        out.vatNumber = in.vatId;
         out.vatId = in.vatId;
-        out.vatNumber = in.vatNo;
+        out.etag = in.etag;
+//        out.email = in.email;
         out.name = in.name;
-        out.phone = in.phone;
-        out.address1 = in.address1;
-        out.address2 = in.address2;
-        out.countryCode = in.countryCode;
-        out.city = in.city;
-        out.zipCode = in.zip;
-        out.isDeleted = in.isDeleted == null ? false : in.isDeleted;
+
+        if (in.contact != null) {
+            out.phone = in.contact.phoneNumber;
+        }
+
+        if (in.address != null) {
+            out.address1 = in.address.addressLine1;
+            out.address2 = in.address.addressLine2;
+            out.countryCode = in.address.country;
+            out.city = in.address.city;
+            out.zipCode = in.address.zipCode;
+            out.isDeleted = in.isDeleted;
+        }
         return out;
     }
 }

@@ -2,8 +2,7 @@ package pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.in
 
 import pl.grizzlysoftware.chlorek.core.model.ContainerType
 import pl.grizzlysoftware.chlorek.core.provider.CategoryProvider
-import pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.out.CanonicalProductToDotykackaProductMapper
-import pl.grizzlysoftware.dotykacka.client.v1.api.dto.product.Product
+import pl.grizzlysoftware.dotykacka.client.v2.model.Product
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -31,6 +30,18 @@ class DotykackaProductToCanonicalProductMapperTest extends Specification {
             output.id == input.id
     }
 
+    def "maps etag properly"() {
+        given:
+            def input = new Product()
+            input.etag = UUID.randomUUID().toString()
+            def m = new DotykackaProductToCanonicalProductMapper(Mock(CategoryProvider))
+        when:
+            def output = m.apply(input)
+        then:
+            output != null
+            output.etag == input.etag
+    }
+
     def "maps categoryId properly"() {
         given:
             def input = new Product()
@@ -42,6 +53,18 @@ class DotykackaProductToCanonicalProductMapperTest extends Specification {
             output != null
             output.categoryId == input.categoryId
             1 * m.categoryProvider.getCategory(_)
+    }
+
+    def "maps currency properly"() {
+        given:
+            def input = new Product()
+            input.currency = "PLN"
+            def m = new DotykackaProductToCanonicalProductMapper(Mock(CategoryProvider))
+        when:
+            def output = m.apply(input)
+        then:
+            output != null
+            output.currency == input.currency
     }
 
     def "maps name properly"() {
@@ -72,7 +95,7 @@ class DotykackaProductToCanonicalProductMapperTest extends Specification {
     def "maps grossPrice properly"(grossPrice, expectedGrossPrice) {
         given:
             def input = new Product()
-            input.grossPrice = grossPrice
+            input.priceWithVat = grossPrice
             def m = new DotykackaProductToCanonicalProductMapper(Mock(CategoryProvider))
         when:
             def output = m.apply(input)
@@ -89,7 +112,7 @@ class DotykackaProductToCanonicalProductMapperTest extends Specification {
     def "maps netPrice properly"(netPrice, expectedNetPrice) {
         given:
             def input = new Product()
-            input.netPrice = netPrice
+            input.priceWithoutVat = netPrice
             def m = new DotykackaProductToCanonicalProductMapper(Mock(CategoryProvider))
         when:
             def output = m.apply(input)
@@ -105,19 +128,19 @@ class DotykackaProductToCanonicalProductMapperTest extends Specification {
     def "maps ean properly"() {
         given:
             def input = new Product()
-            input.ean = "ean"
+            input.eans = ["ean"]
             def m = new DotykackaProductToCanonicalProductMapper(Mock(CategoryProvider))
         when:
             def output = m.apply(input)
         then:
             output != null
-            output.ean == input.ean
+            [output.ean] == input.eans
     }
 
     def "maps minMargin properly"() {
         given:
             def input = new Product()
-            input.marginMin = 20
+            input.marginMin = 20.0
             def m = new DotykackaProductToCanonicalProductMapper(Mock(CategoryProvider))
             m.toFlatMarginMapper = Mock(DotykackaMarginToFlatMarginMapper)
             m.toMarginMapper = Mock(DotykackaMarginToMarginMapper)
@@ -198,14 +221,11 @@ class DotykackaProductToCanonicalProductMapperTest extends Specification {
             1.05 || 0.05
     }
 
-    def "maps tagsList properly"() {
+    def "maps tags properly"() {
         given:
             def input = new Product()
-            input.tagsList = "t1:99,t2:,t3:52,t4"
+            input.tags = ["t1:99", "t2:", "t3:52", "t4"]
             def m = new DotykackaProductToCanonicalProductMapper(Mock(CategoryProvider))
-            m.toTagsMapper = Spy(DotykackaSingleStringTagsToCollectionStringTagsMapper) {
-                apply(_) >> { s -> apply(s) }
-            }
         when:
             def output = m.apply(input)
         then:
@@ -220,14 +240,14 @@ class DotykackaProductToCanonicalProductMapperTest extends Specification {
             output.tags[2].value == "52"
             output.tags[3].name == "t4"
             output.tags[3].value == null
-            1 * m.toTagsMapper.apply(_)
     }
 
     @Unroll
     def "resolves containerType from tags"(containerType) {
         given:
+            def tag = "${CONTAINER_TYPE_TAG}:${containerType}" as String
             def input = new Product()
-            input.tagsList = "${CONTAINER_TYPE_TAG}:${containerType}"
+            input.tags = [tag]
             def m = new DotykackaProductToCanonicalProductMapper(Mock(CategoryProvider))
         when:
             def output = m.apply(input)
@@ -241,7 +261,7 @@ class DotykackaProductToCanonicalProductMapperTest extends Specification {
     def "maps isDiscountPermitted to isDiscountAllowed"(isDiscountPermitted, expectedOutput) {
         given:
             def input = new Product()
-            input.isDiscountPermitted = isDiscountPermitted
+            input.isDiscountable = isDiscountPermitted
             def m = new DotykackaProductToCanonicalProductMapper(Mock(CategoryProvider))
         when:
             def output = m.apply(input)
@@ -249,10 +269,10 @@ class DotykackaProductToCanonicalProductMapperTest extends Specification {
             output != null
             output.isDiscountAllowed == expectedOutput
         where:
-            isDiscountPermitted | expectedOutput
-            null                | false
-            false               | false
-            true                | true
+            isDiscountPermitted || expectedOutput
+            null                || false
+            false               || false
+            true                || true
     }
 
 }

@@ -2,7 +2,9 @@ package pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.out
 
 import pl.grizzlysoftware.chlorek.core.model.KeyValueTag
 import pl.grizzlysoftware.chlorek.core.model.Product
-import pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.util.TagsToStringTagsMapper
+import pl.grizzlysoftware.chlorek.core.provider.CategoryProvider
+import pl.grizzlysoftware.chlorek.core.resolver.ChlorekCsvTagWriter
+import pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.in.DotykackaProductToCanonicalProductMapper
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -42,6 +44,32 @@ class CanonicalProductToDotykackaProductMapperTest extends Specification {
             output.categoryId == input.categoryId
     }
 
+
+    def "maps etag properly"() {
+        given:
+            def input = new Product()
+            input.etag = UUID.randomUUID().toString()
+            def m = new CanonicalProductToDotykackaProductMapper()
+        when:
+            def output = m.apply(input)
+        then:
+            output != null
+            output.etag == input.etag
+    }
+
+
+    def "maps currency properly"() {
+        given:
+            def input = new Product()
+            input.currency = "PLN"
+            def m = new CanonicalProductToDotykackaProductMapper()
+        when:
+            def output = m.apply(input)
+        then:
+            output != null
+            output.currency == input.currency
+    }
+
     def "maps name properly"() {
         given:
             def input = new Product()
@@ -76,7 +104,7 @@ class CanonicalProductToDotykackaProductMapperTest extends Specification {
             def output = m.apply(input)
         then:
             output != null
-            output.grossPrice == input.grossSellPrice
+            output.priceWithVat == input.grossSellPrice
     }
 
     @Unroll
@@ -89,7 +117,7 @@ class CanonicalProductToDotykackaProductMapperTest extends Specification {
             def output = m.apply(input)
         then:
             output != null
-            output.netPrice == input.netSellPrice
+            output.priceWithoutVat == input.netSellPrice
     }
 
     def "maps ean properly"() {
@@ -101,7 +129,7 @@ class CanonicalProductToDotykackaProductMapperTest extends Specification {
             def output = m.apply(input)
         then:
             output != null
-            output.ean == input.ean
+            output.eans == [input.ean]
     }
 
     def "maps minMargin properly"() {
@@ -179,7 +207,7 @@ class CanonicalProductToDotykackaProductMapperTest extends Specification {
             def output = m.apply(input)
         then:
             output != null
-            output.tagsList == "t1:99,t2,t3:52,t4"
+            output.tags == ["t1:99", "t2", "t3:52", "t4"]
     }
 
     @Unroll
@@ -192,23 +220,23 @@ class CanonicalProductToDotykackaProductMapperTest extends Specification {
             def output = m.apply(input)
         then:
             output != null
-            output.isDiscountPermitted == expectedOutput
+            output.isDiscountable == expectedOutput
         where:
-            isDiscountAllowed | expectedOutput
-            false             | false
-            true              | true
+            isDiscountAllowed || expectedOutput
+            false             || false
+            true              || true
     }
 
-    def "invokes while tags mapping"() {
+    def "invokes TagWriter while tags mapping"() {
         given:
             def input = new Product()
             input.tags = [new KeyValueTag("t1", "99"), new KeyValueTag("t2"), new KeyValueTag("t3", "52"), new KeyValueTag("t4")]
             def m = new CanonicalProductToDotykackaProductMapper()
-            m.toStringTagsMapper = Mock(TagsToStringTagsMapper)
+            m.tagWriter = Mock(ChlorekCsvTagWriter)
         when:
             def output = m.apply(input)
         then:
             output != null
-            1 * m.toStringTagsMapper.apply(_)
+            input.tags.size() * m.tagWriter.apply(_)
     }
 }

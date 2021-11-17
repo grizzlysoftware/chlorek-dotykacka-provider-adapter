@@ -3,7 +3,7 @@ package pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.service;
 import pl.grizzlysoftware.chlorek.core.model.Warehouse;
 import pl.grizzlysoftware.chlorek.core.service.WarehouseService;
 import pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.in.DotykackaWarehouseToCanonicalWarehouseMapper;
-import pl.grizzlysoftware.dotykacka.client.v1.facade.WarehouseServiceFacade;
+import pl.grizzlysoftware.dotykacka.client.v2.facade.WarehouseServiceFacade;
 
 import java.util.Collection;
 
@@ -33,8 +33,9 @@ public class DotykackaWarehouseService implements WarehouseService {
     }
 
     @Override
-    public Collection<Warehouse> getWarehouses(int limit, int offset) {
-        var out = service.getWarehouses(limit, offset)
+    public Collection<Warehouse> getWarehouses(int page, int pageSize) {
+        var out = service.getWarehouses(page, pageSize, null)
+                .data
                 .stream()
                 .map(toCanonicalWarehouseMapper)
                 .collect(toList());

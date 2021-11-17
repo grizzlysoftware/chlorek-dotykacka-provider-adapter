@@ -1,7 +1,7 @@
 package pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.service;
 
 import pl.grizzlysoftware.chlorek.core.service.CustomerService;
-import pl.grizzlysoftware.dotykacka.client.v1.facade.CustomerServiceFacade;
+import pl.grizzlysoftware.dotykacka.client.v2.facade.CustomerServiceFacade;
 
 import static java.util.Objects.requireNonNull;
 

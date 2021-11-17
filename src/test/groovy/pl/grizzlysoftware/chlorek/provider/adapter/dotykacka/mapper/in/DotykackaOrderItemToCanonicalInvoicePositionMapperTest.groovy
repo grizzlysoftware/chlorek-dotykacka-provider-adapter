@@ -1,10 +1,10 @@
 package pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.in
 
 import pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.util.SingleStringTagsToCollectionStringTagsMapper
-import pl.grizzlysoftware.dotykacka.client.v1.api.dto.sales.ReceiptItem;
-import spock.lang.Specification;
+import pl.grizzlysoftware.dotykacka.client.v2.model.OrderItem
+import spock.lang.Specification
 
-class DotykackaReceiptItemToCanonicalInvoicePositionMapperTest extends Specification {
+class DotykackaOrderItemToCanonicalInvoicePositionMapperTest extends Specification {
     def "returns null for given null input"() {
         given:
             def m = new DotykackaBranchToCanonicalBranchMapper()
@@ -16,7 +16,7 @@ class DotykackaReceiptItemToCanonicalInvoicePositionMapperTest extends Specifica
 
     def "maps properly"() {
         given:
-            def input = new ReceiptItem()
+            def input = new OrderItem()
             input.orderId = 10L
             input.cloudId = 11L
             input.branchId = 12L
@@ -24,12 +24,11 @@ class DotykackaReceiptItemToCanonicalInvoicePositionMapperTest extends Specifica
             input.productId = 14L
             input.customerId = 15L
             input.employeeId = 16L
-            input.refundId = 17L
             input.name = "product 1"
-            input.ean = "34852345823"
+            input.eans = ["34852345823"]
+            input.tags = ["tag1", "tag2"]
 
-            def m = new DotykackaReceiptItemToCanonicalInvoicePositionMapper()
-            m.tagsMapper = Mock(SingleStringTagsToCollectionStringTagsMapper)
+            def m = new DotykackaOrderItemToCanonicalInvoicePositionMapper()
         when:
             def output = m.apply(input)
         then:
@@ -41,10 +40,8 @@ class DotykackaReceiptItemToCanonicalInvoicePositionMapperTest extends Specifica
             output.productId == input.productId
             output.customerId == input.customerId
             output.employeeId == input.employeeId
-            output.refundId == input.refundId
             output.name == input.name
-            output.ean == input.ean
-
-            1 * m.tagsMapper.apply(_)
+            [output.ean] == input.eans
+            output.tags == input.tags
     }
 }

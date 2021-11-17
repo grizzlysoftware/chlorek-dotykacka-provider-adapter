@@ -2,7 +2,7 @@ package pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.service
 
 import org.apache.commons.lang3.StringUtils
 import pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.in.DotykackaCategoryToCanonicalCategoryMapper
-import pl.grizzlysoftware.dotykacka.client.v1.facade.CategoryServiceFacade
+import pl.grizzlysoftware.dotykacka.client.v2.facade.CategoryServiceFacade
 import spock.lang.Specification
 
 import static java.util.stream.Collectors.toList
@@ -19,7 +19,7 @@ class DotykackaCategoryServiceTest extends Specification {
     def "returns categories"() {
         given:
             def service = Mock(CategoryServiceFacade) {
-                getCategories() >> [category(""), category(""), category(""), category("")]
+                getAllCategories() >> [category(""), category(""), category(""), category("")]
             }
             def m = new DotykackaCategoryService(service)
         when:
@@ -32,7 +32,7 @@ class DotykackaCategoryServiceTest extends Specification {
     def "returned categories are sorted alphabetically ascending"() {
         given:
             def service = Mock(CategoryServiceFacade) {
-                getCategories() >> [category("b"), category("c"), category("a"), category("e")]
+                getAllCategories() >> [category("b"), category("c"), category("a"), category("e")]
             }
             def m = new DotykackaCategoryService(service)
         when:
@@ -47,7 +47,7 @@ class DotykackaCategoryServiceTest extends Specification {
     def "invokes toCanonicalCategoryMapper for each fetched category"() {
         given:
             def service = Mock(CategoryServiceFacade) {
-                getCategories() >> [category(""), category(""), category(""), category("")]
+                getAllCategories() >> [category(""), category(""), category(""), category("")]
             }
             def m = new DotykackaCategoryService(service)
             m.toCanonicalCategoryMapper = Mock(DotykackaCategoryToCanonicalCategoryMapper) {
@@ -63,7 +63,7 @@ class DotykackaCategoryServiceTest extends Specification {
     def "does not throw exception if returned category contents are empty"() {
         given:
             def service = Mock(CategoryServiceFacade) {
-                getCategories() >> [category(null), category(null), category(null), category(null)]
+                getAllCategories() >> [category(null), category(null), category(null), category(null)]
             }
             def m = new DotykackaCategoryService(service)
             m.toCanonicalCategoryMapper = Mock(DotykackaCategoryToCanonicalCategoryMapper) {

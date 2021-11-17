@@ -3,7 +3,7 @@ package pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.service;
 import pl.grizzlysoftware.chlorek.core.model.Category;
 import pl.grizzlysoftware.chlorek.core.service.CategoryService;
 import pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.in.DotykackaCategoryToCanonicalCategoryMapper;
-import pl.grizzlysoftware.dotykacka.client.v1.facade.CategoryServiceFacade;
+import pl.grizzlysoftware.dotykacka.client.v2.facade.CategoryServiceFacade;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -26,8 +26,9 @@ public class DotykackaCategoryService implements CategoryService {
     }
 
     @Override
-    public Collection<Category> getCategories(int limit, int offset, String order) {
-        var out = service.getCategories(limit, offset, order)
+    public Collection<Category> getCategories(int page, int pageSize, String order) {
+        var out = service.getCategories(page+1, pageSize, order)
+                .data
                 .stream()
                 .map(toCanonicalCategoryMapper)
                 .sorted(Comparator.comparing(e -> e.name))
@@ -37,7 +38,7 @@ public class DotykackaCategoryService implements CategoryService {
 
     @Override
     public Collection<Category> getCategories() {
-        var out = service.getCategories()
+        var out = service.getAllCategories()
                 .stream()
                 .map(toCanonicalCategoryMapper)
                 .sorted(stringComparator(e -> e.name))

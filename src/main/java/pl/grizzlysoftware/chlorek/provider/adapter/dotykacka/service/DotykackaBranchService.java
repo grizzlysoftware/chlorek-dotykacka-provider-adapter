@@ -3,7 +3,7 @@ package pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.service;
 import pl.grizzlysoftware.chlorek.core.model.Branch;
 import pl.grizzlysoftware.chlorek.core.service.BranchService;
 import pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.in.DotykackaBranchToCanonicalBranchMapper;
-import pl.grizzlysoftware.dotykacka.client.v1.facade.BranchServiceFacade;
+import pl.grizzlysoftware.dotykacka.client.v2.facade.BranchServiceFacade;
 
 import java.util.Collection;
 
@@ -25,7 +25,7 @@ public class DotykackaBranchService implements BranchService {
 
     @Override
     public Collection<Branch> getBranches() {
-        var out = service.getBranches()
+        var out = service.getAllBranches()
                 .stream()
                 .map(toCanonicalBranchMapper)
                 .collect(toList());

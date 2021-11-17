@@ -1,26 +1,20 @@
 package pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.mapper.in;
 
 import pl.grizzlysoftware.chlorek.core.model.InvoicePosition;
-import pl.grizzlysoftware.chlorek.provider.adapter.dotykacka.util.SingleStringTagsToCollectionStringTagsMapper;
-import pl.grizzlysoftware.dotykacka.client.v1.api.dto.sales.ReceiptItem;
+import pl.grizzlysoftware.dotykacka.client.v2.model.OrderItem;
 
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.function.Function;
-
-import static pl.grizzlysoftware.commons.TimeUtils.fromMillis;
 
 /**
  * @author Bartosz Pawłowski, bpawlowski@grizzlysoftware.pl
  */
-public class DotykackaReceiptItemToCanonicalInvoicePositionMapper implements Function<ReceiptItem, InvoicePosition> {
-    protected SingleStringTagsToCollectionStringTagsMapper tagsMapper;
-
-    public DotykackaReceiptItemToCanonicalInvoicePositionMapper() {
-        this.tagsMapper = new SingleStringTagsToCollectionStringTagsMapper();
-    }
+public class DotykackaOrderItemToCanonicalInvoicePositionMapper implements Function<OrderItem, InvoicePosition> {
 
     @Override
-    public InvoicePosition apply(ReceiptItem in) {
+    public InvoicePosition apply(OrderItem in) {
         if (in == null) {
             return null;
         }
@@ -33,16 +27,17 @@ public class DotykackaReceiptItemToCanonicalInvoicePositionMapper implements Fun
         out.customerId = in.customerId;
         out.productId = in.productId;
         out.employeeId = in.employeeId;
-        out.refundId = in.refundId;
+//        out.refundId = in.refundId;
         out.name = in.name;
-        out.ean = in.ean;
-        out.tags = tagsMapper.apply(in.tagsList);
-        out.cancelledAt = fromMillis(in.cancelledAt);
-        out.completedAt = fromMillis(in.completedAt);
+        out.ean = String.join(",", Optional.ofNullable(in.eans).orElseGet(Collections::emptyList));
+        out.tags = in.tags;
+        out.cancelledAt = in.canceledAt == null ? null : in.canceledAt.toLocalDateTime();
+        out.completedAt = in.completedAt == null ? null : in.completedAt.toLocalDateTime();
         out.quantity = in.quantity;
         out.vat = in.vat == null ? BigDecimal.ZERO : in.vat.subtract(BigDecimal.ONE);
         out.priceWithoutVat = in.totalPriceWithVat;
-        out.priceBilledWithoutVat = in.billedUnitPrice;
+//        out.priceBilledWithoutVat = in.billedUnitPrice;
+        out.priceBilledWithoutVat = in.billedUnitPriceWithoutVat;
 
         return out;
     }
